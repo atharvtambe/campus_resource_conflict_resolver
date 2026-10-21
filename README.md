@@ -42,7 +42,7 @@ campus_resource_conflict_resolver/
 
 ---
 
-## Phase 1 & 2 Completed Deliverables
+## Phase 1, 2 & 3 Completed Deliverables
 
 ### Phase 1: Environment and Project Setup
 1. **Virtual Environment**: Python venv configured and activated.
@@ -72,8 +72,28 @@ campus_resource_conflict_resolver/
    - Consecutive / adjacent slots (e.g. 10:00–11:00 and 11:00–12:00) are cleanly permitted.
 6. **Django Admin Integration**:
    - Registered models with search, filters, inline history audit logs, and list displays.
-7. **Automated Test Suite**:
-   - 11 unit tests covering model validations, CRUD operations, half-open intervals, conflict checks, and audit history.
+
+### Phase 3: Authentication and Permissions
+1. **Registration & Role Assignment**:
+   - Registration form with server-side duplicate username and duplicate email checks.
+   - Password confirmation and Django password validators (`validate_password`).
+   - Role selection (`Student`, `Faculty Member`) automatically adds the user to the corresponding Django `Group`.
+   - Default role groups (`Student`, `Faculty`, `Resource Manager`) initialized via `python manage.py init_roles`.
+2. **Login, Logout & Password Management**:
+   - Bootstrap 5 styled login view (`CampusLoginView`) with session management and flash alerts.
+   - Secure logout (`logout_view`) clearing session with feedback message.
+   - Password change forms and confirmation views (`CampusPasswordChangeView`, `CampusPasswordChangeDoneView`).
+3. **Role-Aware Access Control & Permissions**:
+   - Custom decorators: `@admin_or_staff_required`, `@role_required(['Faculty', 'Resource Manager'])`.
+   - Object-level authorization checks:
+     - Normal users can only view and cancel their own bookings.
+     - Administrators and Resource Managers can review, approve, and reject reservations.
+   - Custom `403.html` template for graceful permission-denied feedback.
+4. **Responsive Bootstrap 5 UI & Navigation**:
+   - Responsive navbar displaying real-time authentication state, username, and role badge (`Admin`, `Manager`, `Faculty`, `Student`).
+   - Central role-aware dashboard (`dashboard_home`) showing admin metrics (resources, pending approvals) or student/faculty metrics (user reservations).
+5. **Automated Test Suite**:
+   - 26 tests across models, interval conflict checks, registration, login/logout, role groups, and object-level permissions (`Ran 26 tests - OK`).
 
 ---
 

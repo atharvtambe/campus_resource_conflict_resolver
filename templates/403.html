@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}403 - Permission Denied{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-5">
+    <div class="col-md-7 col-lg-6 text-center">
+        <div class="card shadow border-0 rounded-3 p-4">
+            <div class="card-body">
+                <i class="bi bi-shield-x text-danger display-1 mb-3"></i>
+                <h2 class="fw-bold text-danger mb-2">403 - Access Denied</h2>
+                <p class="text-muted lead mb-4">
+                    {% if exception %}
+                        {{ exception }}
+                    {% else %}
+                        You do not have permission to access this resource or perform this administrative action.
+                    {% endif %}
+                </p>
+                <div class="alert alert-light border small text-muted text-start mb-4">
+                    <strong>Current Role:</strong> <span class="badge bg-secondary">{{ user_role }}</span><br>
+                    <strong>User:</strong> {{ user.username }} ({{ user.email }})<br>
+                    If you believe you should have access, please contact a campus system administrator.
+                </div>
+                <div class="d-flex justify-content-center gap-2">
+                    <a href="{% url 'dashboard' %}" class="btn btn-primary px-4">
+                        <i class="bi bi-speedometer2 me-1"></i> Go to Dashboard
+                    </a>
+                    <a href="{% url 'logout' %}" class="btn btn-outline-secondary px-3">
+                        <i class="bi bi-box-arrow-right me-1"></i> Switch Account
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

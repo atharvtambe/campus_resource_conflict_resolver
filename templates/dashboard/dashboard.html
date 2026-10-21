@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Campus Resource Conflict Resolver{% endblock %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col-md-8">
+        <h2 class="fw-bold mb-1">
+            Welcome, {{ user.first_name|default:user.username }}!
+        </h2>
+        <p class="text-muted mb-0">
+            Campus Reservation Dashboard & Conflict Management System
+        </p>
+    </div>
+    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <span class="fs-6 text-muted me-2">Role:</span>
+        {% if user_role == 'Administrator' %}
+            <span class="badge bg-danger fs-6 px-3 py-2"><i class="bi bi-shield-fill me-1"></i>Administrator</span>
+        {% elif user_role == 'Resource Manager' %}
+            <span class="badge bg-warning text-dark fs-6 px-3 py-2"><i class="bi bi-gear-fill me-1"></i>Resource Manager</span>
+        {% elif user_role == 'Faculty' %}
+            <span class="badge bg-success fs-6 px-3 py-2"><i class="bi bi-mortarboard-fill me-1"></i>Faculty Member</span>
+        {% else %}
+            <span class="badge bg-primary fs-6 px-3 py-2"><i class="bi bi-person-fill me-1"></i>Student</span>
+        {% endif %}
+    </div>
+</div>
+
+{% if is_admin or is_manager %}
+<!-- ================= ADMIN / RESOURCE MANAGER VIEW ================= -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card shadow-sm border-0 border-start border-primary border-4 rounded-3 h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Total Resources</div>
+                        <div class="fs-3 fw-bold text-dark">{{ total_resources }}</div>
+                    </div>
+                    <div class="bg-primary bg-opacity-10 text-primary p-3 rounded-circle">
+                        <i class="bi bi-building fs-3"></i>
+                    </div>
+                </div>
+                <div class="small text-muted mt-2">Active: <span class="fw-semibold text-success">{{ active_resources }}</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="card shadow-sm border-0 border-start border-warning border-4 rounded-3 h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Pending Approvals</div>
+                        <div class="fs-3 fw-bold text-dark">{{ pending_bookings }}</div>
+                    </div>
+                    <div class="bg-warning bg-opacity-10 text-warning p-3 rounded-circle">
+                        <i class="bi bi-hourglass-split fs-3"></i>
+                    </div>
+                </div>
+                <div class="small text-muted mt-2">Requires administrator review</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="card shadow-sm border-0 border-start border-success border-4 rounded-3 h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Approved Bookings</div>
+                        <div class="fs-3 fw-bold text-dark">{{ approved_bookings }}</div>
+                    </div>
+                    <div class="bg-success bg-opacity-10 text-success p-3 rounded-circle">
+                        <i class="bi bi-calendar-check fs-3"></i>
+                    </div>
+                </div>
+                <div class="small text-muted mt-2">Active confirmed schedules</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="card shadow-sm border-0 border-start border-info border-4 rounded-3 h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Management Console</div>
+                        <div class="fs-6 fw-bold text-dark">Django Admin</div>
+                    </div>
+                    <div class="bg-info bg-opacity-10 text-info p-3 rounded-circle">
+                        <i class="bi bi-sliders fs-3"></i>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <a href="{% url 'admin:index' %}" class="btn btn-outline-info btn-sm w-100">
+                        Open Admin <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pending Requests Table -->
+<div class="card shadow-sm border-0 rounded-3 mb-4">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-clock-history me-2 text-warning"></i>Recent Pending Requests</h5>
+        <span class="badge bg-warning text-dark">{{ pending_bookings }} Pending</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Resource</th>
+                        <th>Requester</th>
+                        <th>Time Interval</th>
+                        <th>Purpose</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in recent_pending_requests %}
+                    <tr>
+                        <td class="fw-semibold">{{ req.resource.name }}</td>
+                        <td>
+                            <i class="bi bi-person me-1 text-muted"></i>{{ req.user.username }}
+                            <div class="small text-muted">{{ req.user.email }}</div>
+                        </td>
+                        <td class="small">
+                            <div><i class="bi bi-calendar-event me-1"></i>{{ req.start_time|date:"M d, Y H:i" }}</div>
+                            <div class="text-muted">to {{ req.end_time|date:"H:i" }}</div>
+                        </td>
+                        <td class="small text-truncate" style="max-width: 250px;">{{ req.purpose }}</td>
+                        <td><span class="badge bg-warning text-dark">Pending</span></td>
+                        <td>
+                            <a href="{% url 'admin:bookings_booking_change' req.id %}" class="btn btn-sm btn-outline-primary">
+                                Review in Admin
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">
+                            <i class="bi bi-check2-circle fs-3 d-block text-success mb-1"></i>
+                            No pending booking requests at this moment.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<!-- ================= STUDENT / FACULTY VIEW ================= -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 border-start border-primary border-4 rounded-3 h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">My Total Bookings</div>
+                        <div class="fs-3 fw-bold text-dark">{{ total_user_bookings }}</div>
+                    </div>
+                    <div class="bg-primary bg-opacity-10 text-primary p-3 rounded-circle">
+                        <i class="bi bi-bookmark-fill fs-3"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 border-start border-warning border-4 rounded-3 h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Pending Approval</div>
+                        <div class="fs-3 fw-bold text-dark">{{ pending_user_bookings }}</div>
+                    </div>
+                    <div class="bg-warning bg-opacity-10 text-warning p-3 rounded-circle">
+                        <i class="bi bi-hourglass-split fs-3"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 border-start border-success border-4 rounded-3 h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Confirmed / Approved</div>
+                        <div class="fs-3 fw-bold text-dark">{{ approved_user_bookings }}</div>
+                    </div>
+                    <div class="bg-success bg-opacity-10 text-success p-3 rounded-circle">
+                        <i class="bi bi-check-circle-fill fs-3"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- User's Recent Bookings Table -->
+<div class="card shadow-sm border-0 rounded-3 mb-4">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-journal-check me-2 text-primary"></i>My Recent Reservations</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Resource</th>
+                        <th>Time Slot</th>
+                        <th>Purpose</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for bk in recent_user_bookings %}
+                    <tr>
+                        <td class="fw-semibold">
+                            {{ bk.resource.name }}
+                            <div class="small text-muted">{{ bk.resource.location }}</div>
+                        </td>
+                        <td class="small">
+                            <div>{{ bk.start_time|date:"M d, Y" }}</div>
+                            <div class="text-muted">{{ bk.start_time|date:"H:i" }} – {{ bk.end_time|date:"H:i" }}</div>
+                        </td>
+                        <td class="small">{{ bk.purpose }}</td>
+                        <td>
+                            {% if bk.status == 'APPROVED' %}
+                                <span class="badge bg-success">Approved</span>
+                            {% elif bk.status == 'PENDING' %}
+                                <span class="badge bg-warning text-dark">Pending</span>
+                            {% elif bk.status == 'REJECTED' %}
+                                <span class="badge bg-danger">Rejected</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Cancelled</span>
+                            {% endif %}
+                        </td>
+                        <td class="small text-muted">{{ bk.created_at|date:"M d, H:i" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            <i class="bi bi-calendar-plus fs-2 d-block text-primary mb-2"></i>
+                            You don't have any reservations yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

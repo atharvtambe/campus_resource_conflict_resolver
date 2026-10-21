@@ -1,22 +1,33 @@
 """
-URL configuration for campus_resolver project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/6.1/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
+URL Configuration for Campus Resource Conflict Resolver.
+Phase 3: Authentication, Permissions, and Dashboard Routing.
 """
+
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from django.shortcuts import redirect
+from . import views
+
+
+def home_redirect(request):
+    """Root URL redirects to dashboard if authenticated, or login."""
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    return redirect('login')
+
 
 urlpatterns = [
+    # Administration
     path('admin/', admin.site.urls),
+
+    # Authentication
+    path('register/', views.register_view, name='register'),
+    path('login/', views.CampusLoginView.as_view(), name='login'),
+    path('logout/', views.logout_view, name='logout'),
+    path('password_change/', views.CampusPasswordChangeView.as_view(), name='password_change'),
+    path('password_change/done/', views.CampusPasswordChangeDoneView.as_view(), name='password_change_done'),
+
+    # Dashboard & Root
+    path('dashboard/', include('dashboard.urls')),
+    path('', home_redirect, name='home'),
 ]
