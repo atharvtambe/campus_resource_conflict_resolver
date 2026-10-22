@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}My Reservations - Campus Resource Conflict Resolver{% endblock %}
+
+{% block content %}
+<div class="row align-items-center mb-4">
+    <div class="col-md-8">
+        <h2 class="fw-bold mb-1"><i class="bi bi-bookmark-check-fill text-primary me-2"></i>My Reservations</h2>
+        <p class="text-muted mb-0">Track reservation statuses, view audit history, or cancel eligible bookings.</p>
+    </div>
+    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <a href="{% url 'bookings:create_booking' %}" class="btn btn-primary fw-semibold">
+            <i class="bi bi-plus-circle me-1"></i> New Reservation
+        </a>
+    </div>
+</div>
+
+<!-- Status Filter Pills -->
+<div class="card shadow-sm border-0 rounded-3 mb-4">
+    <div class="card-body p-2 p-md-3">
+        <ul class="nav nav-pills gap-1">
+            <li class="nav-item">
+                <a class="nav-link {% if not status_filter %}active{% endif %}" href="{% url 'bookings:my_bookings' %}">
+                    All <span class="badge bg-secondary ms-1">{{ total_count }}</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if status_filter == 'PENDING' %}active bg-warning text-dark{% endif %}" href="?status=PENDING">
+                    <i class="bi bi-hourglass-split me-1"></i> Pending
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if status_filter == 'APPROVED' %}active bg-success{% endif %}" href="?status=APPROVED">
+                    <i class="bi bi-check-circle me-1"></i> Approved
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if status_filter == 'REJECTED' %}active bg-danger{% endif %}" href="?status=REJECTED">
+                    <i class="bi bi-x-circle me-1"></i> Rejected
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if status_filter == 'CANCELLED' %}active bg-secondary{% endif %}" href="?status=CANCELLED">
+                    <i class="bi bi-slash-circle me-1"></i> Cancelled
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- Bookings List Table -->
+<div class="card shadow-sm border-0 rounded-3 mb-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 10%;">ID</th>
+                        <th style="width: 25%;">Resource</th>
+                        <th style="width: 25%;">Time Slot</th>
+                        <th style="width: 20%;">Purpose</th>
+                        <th style="width: 10%;">Status</th>
+                        <th style="width: 10%; text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for bk in page_obj %}
+                        <tr>
+                            <td class="fw-bold text-muted">#{{ bk.id }}</td>
+                            <td>
+                                <a href="{% url 'resources:resource_detail' bk.resource.pk %}" class="fw-semibold text-decoration-none text-dark d-block">
+                                    {{ bk.resource.name }}
+                                </a>
+                                <span class="small text-muted"><i class="bi bi-geo-alt me-1"></i>{{ bk.resource.location }}</span>
+                            </td>
+                            <td>
+                                <div class="fw-semibold">{{ bk.start_time|date:"M d, Y" }}</div>
+                                <div class="small text-muted">{{ bk.start_time|date:"H:i" }} – {{ bk.end_time|date:"H:i" }}</div>
+                            </td>
+                            <td class="small text-truncate" style="max-width: 200px;">
+                                {{ bk.purpose }}
+                            </td>
+                            <td>
+                                {% if bk.status == 'APPROVED' %}
+                                    <span class="badge bg-success px-2 py-1"><i class="bi bi-check-circle me-1"></i>Approved</span>
+                                {% elif bk.status == 'PENDING' %}
+                                    <span class="badge bg-warning text-dark px-2 py-1"><i class="bi bi-hourglass-split me-1"></i>Pending</span>
+                                {% elif bk.status == 'REJECTED' %}
+                                    <span class="badge bg-danger px-2 py-1"><i class="bi bi-x-circle me-1"></i>Rejected</span>
+                                {% else %}
+                                    <span class="badge bg-secondary px-2 py-1"><i class="bi bi-slash-circle me-1"></i>Cancelled</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'bookings:booking_detail' bk.id %}" class="btn btn-outline-secondary" title="View Details and History">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    {% if bk.status == 'PENDING' or bk.status == 'APPROVED' %}
+                                        <a href="{% url 'bookings:cancel_booking' bk.id %}" class="btn btn-outline-danger" title="Cancel this reservation">
+                                            <i class="bi bi-x-lg"></i>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-1 d-block text-muted mb-2"></i>
+                                <h5 class="fw-bold">No reservations found</h5>
+                                <p class="small text-muted mb-3">You don't have any bookings matching this status filter.</p>
+                                <a href="{% url 'bookings:create_booking' %}" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-plus-lg me-1"></i> Book a Resource Now
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Pagination -->
+{% if page_obj.has_other_pages %}
+<nav aria-label="Bookings pagination" class="d-flex justify-content-center">
+    <ul class="pagination shadow-sm">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                    &laquo; Previous
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">&laquo; Previous</span></li>
+        {% endif %}
+
+        {% for p in page_obj.paginator.page_range %}
+            {% if p == page_obj.number %}
+                <li class="page-item active"><span class="page-link">{{ p }}</span></li>
+            {% elif p >= page_obj.number|add:'-2' and p <= page_obj.number|add:'2' %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ p }}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                        {{ p }}
+                    </a>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                    Next &raquo;
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">Next &raquo;</span></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% endblock %}

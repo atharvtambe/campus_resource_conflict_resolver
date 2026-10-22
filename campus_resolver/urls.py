@@ -1,6 +1,6 @@
 """
 URL Configuration for Campus Resource Conflict Resolver.
-Phase 3: Authentication, Permissions, and Dashboard Routing.
+Phase 3 & 4: Authentication, Resources, Bookings, Dashboard Routing.
 """
 
 from django.contrib import admin
@@ -26,6 +26,10 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('password_change/', views.CampusPasswordChangeView.as_view(), name='password_change'),
     path('password_change/done/', views.CampusPasswordChangeDoneView.as_view(), name='password_change_done'),
+
+    # Core Features (Phase 4)
+    path('resources/', include('resources.urls')),
+    path('bookings/', include('bookings.urls')),
 
     # Dashboard & Root
     path('dashboard/', include('dashboard.urls')),

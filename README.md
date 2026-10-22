@@ -42,7 +42,7 @@ campus_resource_conflict_resolver/
 
 ---
 
-## Phase 1, 2 & 3 Completed Deliverables
+## Phase 1, 2, 3 & 4 Completed Deliverables
 
 ### Phase 1: Environment and Project Setup
 1. **Virtual Environment**: Python venv configured and activated.
@@ -92,8 +92,33 @@ campus_resource_conflict_resolver/
 4. **Responsive Bootstrap 5 UI & Navigation**:
    - Responsive navbar displaying real-time authentication state, username, and role badge (`Admin`, `Manager`, `Faculty`, `Student`).
    - Central role-aware dashboard (`dashboard_home`) showing admin metrics (resources, pending approvals) or student/faculty metrics (user reservations).
-5. **Automated Test Suite**:
-   - 26 tests across models, interval conflict checks, registration, login/logout, role groups, and object-level permissions (`Ran 26 tests - OK`).
+
+### Phase 4: Resources and Availability
+1. **Resource Browsing & Search (`/resources/`)**:
+   - Search by keyword (`name`, `description`, `location`).
+   - Filtering by `category/resource_type`, `location`, `min_capacity`, and active status.
+   - Responsive cards with category badges, capacity, and status badges.
+   - Paginated display preserving filter query arguments.
+2. **Date-Specific Availability & Resource Details (`/resources/<id>/`)**:
+   - Detailed resource specifications, equipment facilities, and capacity.
+   - Interactive date-picker availability calendar.
+   - Real-time schedule display showing all confirmed/pending bookings and maintenance blocks for that specific day.
+   - Clear indicators for open slots vs occupied half-open intervals `[start, end)`.
+3. **Authorized Resource Management**:
+   - `/resources/create/` and `/resources/<id>/edit/`: Restricted to administrators and resource managers with input validation.
+   - `/resources/<id>/block/`: Allows scheduling maintenance blackout periods.
+4. **Booking Forms & Conflict Validation (`/bookings/book/`)**:
+   - Validates that `start_time < end_time` and enforces minimum duration.
+   - Validates that resource is active.
+   - Real-time conflict engine: Blocks overlapping booking requests with existing pending/approved slots or maintenance windows.
+   - Permitted adjacent booking slots: consecutive reservations (e.g. 10:00–11:00 followed by 11:00–12:00) succeed without false positives.
+   - Auto-assigns logged-in user, sets status `PENDING`, and logs initial creation in `BookingHistory`.
+5. **Personal Reservations & Cancellation (`/bookings/my-bookings/`)**:
+   - Status filtering pills: All, Pending, Approved, Cancelled, Rejected.
+   - Details view (`/bookings/<id>/`) showing complete reservation info and full audit trail timeline of status transitions.
+   - Eligible cancellation workflow (`/bookings/<id>/cancel/`): Allows users to cancel their own pending/approved reservations with optional reason logging into `BookingHistory`.
+6. **Automated Test Suite**:
+   - 42 tests passing across models, services, auth, resource filtering, availability schedules, booking forms, conflict validation, and cancellations (`Ran 42 tests in 76.225s - OK`).
 
 ---
 

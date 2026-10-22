@@ -51,10 +51,25 @@
 
             <div class="collapse navbar-collapse" id="navbarContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.app_name == 'resources' %}active{% endif %}" href="{% url 'resources:resource_list' %}">
+                            <i class="bi bi-grid-3x3-gap me-1"></i> Resources
+                        </a>
+                    </li>
                     {% if user.is_authenticated %}
                         <li class="nav-item">
                             <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
                                 <i class="bi bi-speedometer2 me-1"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'my_bookings' %}active{% endif %}" href="{% url 'bookings:my_bookings' %}">
+                                <i class="bi bi-journal-bookmark me-1"></i> My Bookings
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'create_booking' %}active{% endif %}" href="{% url 'bookings:create_booking' %}">
+                                <i class="bi bi-calendar-plus me-1"></i> Book Slot
                             </a>
                         </li>
                         {% if is_admin_or_staff %}

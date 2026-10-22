@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Booking #{{ booking.id }} Details - Campus Resource Conflict Resolver{% endblock %}
+
+{% block content %}
+<div class="mb-3">
+    <a href="{% url 'bookings:my_bookings' %}" class="text-decoration-none text-muted small">
+        <i class="bi bi-arrow-left me-1"></i> Back to My Reservations
+    </a>
+</div>
+
+<div class="row g-4">
+    <!-- Left Column: Booking Info -->
+    <div class="col-lg-7">
+        <div class="card shadow-sm border-0 rounded-3 mb-4">
+            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold">
+                    <i class="bi bi-calendar-event text-primary me-2"></i>Reservation #{{ booking.id }}
+                </h5>
+                <div>
+                    {% if booking.status == 'APPROVED' %}
+                        <span class="badge bg-success px-3 py-2 fs-6"><i class="bi bi-check-circle me-1"></i>Approved</span>
+                    {% elif booking.status == 'PENDING' %}
+                        <span class="badge bg-warning text-dark px-3 py-2 fs-6"><i class="bi bi-hourglass-split me-1"></i>Pending Review</span>
+                    {% elif booking.status == 'REJECTED' %}
+                        <span class="badge bg-danger px-3 py-2 fs-6"><i class="bi bi-x-circle me-1"></i>Rejected</span>
+                    {% else %}
+                        <span class="badge bg-secondary px-3 py-2 fs-6"><i class="bi bi-slash-circle me-1"></i>Cancelled</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+                <!-- Resource Details -->
+                <div class="p-3 bg-light rounded-3 mb-4 border">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <span class="badge bg-secondary mb-1">{{ booking.resource.get_resource_type_display }}</span>
+                            <h5 class="fw-bold mb-1">
+                                <a href="{% url 'resources:resource_detail' booking.resource.pk %}" class="text-dark text-decoration-none">
+                                    {{ booking.resource.name }}
+                                </a>
+                            </h5>
+                            <div class="small text-muted">
+                                <i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ booking.resource.location }} • Capacity: {{ booking.resource.capacity }} seats
+                            </div>
+                        </div>
+                        <a href="{% url 'resources:resource_detail' booking.resource.pk %}" class="btn btn-sm btn-outline-primary">
+                            View Resource
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Timing Details -->
+                <div class="row g-3 mb-4">
+                    <div class="col-sm-6">
+                        <div class="p-3 border rounded-3">
+                            <div class="small text-muted fw-semibold text-uppercase">Start Time (Inclusive)</div>
+                            <div class="fs-6 fw-bold text-dark mt-1">{{ booking.start_time|date:"l, M d, Y" }}</div>
+                            <div class="text-primary fw-bold">{{ booking.start_time|date:"H:i" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="p-3 border rounded-3">
+                            <div class="small text-muted fw-semibold text-uppercase">End Time (Exclusive)</div>
+                            <div class="fs-6 fw-bold text-dark mt-1">{{ booking.end_time|date:"l, M d, Y" }}</div>
+                            <div class="text-primary fw-bold">{{ booking.end_time|date:"H:i" }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Requester & Purpose -->
+                <div class="mb-4">
+                    <h6 class="fw-bold text-muted text-uppercase small">Reserved By</h6>
+                    <p class="mb-0 text-dark">
+                        <i class="bi bi-person-fill me-1"></i>{{ booking.user.get_full_name|default:booking.user.username }} 
+                        <span class="text-muted small">({{ booking.user.email }})</span>
+                    </p>
+                </div>
+
+                <div class="mb-4">
+                    <h6 class="fw-bold text-muted text-uppercase small">Purpose / Justification</h6>
+                    <div class="p-3 bg-light rounded-3 text-secondary border">
+                        {{ booking.purpose|linebreaks }}
+                    </div>
+                </div>
+
+                <div class="text-muted small">
+                    <i class="bi bi-clock me-1"></i>Request created on {{ booking.created_at|date:"M d, Y H:i" }}
+                </div>
+            </div>
+
+            {% if can_cancel %}
+                <div class="card-footer bg-white border-top p-3 d-flex justify-content-end">
+                    <a href="{% url 'bookings:cancel_booking' booking.id %}" class="btn btn-outline-danger">
+                        <i class="bi bi-x-circle me-1"></i> Cancel This Reservation
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Right Column: Audit History Timeline -->
+    <div class="col-lg-5">
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h5 class="mb-0 fw-bold">
+                    <i class="bi bi-clock-history text-secondary me-2"></i>Status & Audit Trail
+                </h5>
+                <div class="text-muted small">Recorded status transitions and remarks</div>
+            </div>
+            <div class="card-body p-4">
+                {% if history_records %}
+                    <ul class="list-unstyled mb-0 position-relative">
+                        {% for hist in history_records %}
+                            <li class="mb-4 position-relative ps-4 border-start border-2 border-primary">
+                                <div class="position-absolute top-0 start-0 translate-middle bg-primary rounded-circle" style="width: 12px; height: 12px;"></div>
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="fw-bold text-dark">
+                                        {% if hist.old_status %}
+                                            {{ hist.old_status }} &rarr; <span class="text-primary">{{ hist.new_status }}</span>
+                                        {% else %}
+                                            <span class="text-primary">{{ hist.new_status }}</span>
+                                        {% endif %}
+                                    </span>
+                                    <span class="badge bg-light text-muted border">{{ hist.changed_at|date:"M d, H:i" }}</span>
+                                </div>
+                                <div class="small text-muted mb-1">
+                                    <i class="bi bi-person me-1"></i>Action by: <strong>{{ hist.changed_by.username|default:"System" }}</strong>
+                                </div>
+                                {% if hist.remarks %}
+                                    <div class="small text-secondary bg-light p-2 rounded border">
+                                        {{ hist.remarks }}
+                                    </div>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted small mb-0">No historical status changes recorded yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
