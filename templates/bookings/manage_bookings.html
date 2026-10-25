@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Campus Reservations - Campus Resource Conflict Resolver{% endblock %}
+
+{% block content %}
+<div class="row align-items-center mb-4">
+    <div class="col-md-8">
+        <h2 class="fw-bold mb-1">
+            <i class="bi bi-shield-check text-warning me-2"></i>Reservation Approvals & Queue
+        </h2>
+        <p class="text-muted mb-0">
+            Review, approve, reject, or manage all resource booking requests across campus.
+        </p>
+    </div>
+    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <a href="{% url 'bookings:create_booking' %}" class="btn btn-outline-primary btn-sm me-2">
+            <i class="bi bi-plus-lg me-1"></i> New Request
+        </a>
+        <a href="{% url 'admin:bookings_booking_changelist' %}" class="btn btn-outline-secondary btn-sm" target="_blank">
+            <i class="bi bi-sliders me-1"></i> Admin Console
+        </a>
+    </div>
+</div>
+
+<!-- Metrics & Quick Status Tabs -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <a href="{% url 'bookings:manage_bookings' %}?status=PENDING" class="text-decoration-none">
+            <div class="card shadow-sm border-0 border-start border-warning border-4 rounded-3 h-100 hover-shadow transition">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="text-muted small fw-semibold text-uppercase">Pending Review</div>
+                            <div class="fs-3 fw-bold text-dark">{{ pending_count }}</div>
+                        </div>
+                        <div class="bg-warning bg-opacity-10 text-warning p-3 rounded-circle">
+                            <i class="bi bi-hourglass-split fs-3"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-4">
+        <a href="{% url 'bookings:manage_bookings' %}?status=APPROVED" class="text-decoration-none">
+            <div class="card shadow-sm border-0 border-start border-success border-4 rounded-3 h-100 hover-shadow transition">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="text-muted small fw-semibold text-uppercase">Approved & Active</div>
+                            <div class="fs-3 fw-bold text-dark">{{ approved_count }}</div>
+                        </div>
+                        <div class="bg-success bg-opacity-10 text-success p-3 rounded-circle">
+                            <i class="bi bi-calendar-check fs-3"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-4">
+        <a href="{% url 'bookings:manage_bookings' %}" class="text-decoration-none">
+            <div class="card shadow-sm border-0 border-start border-primary border-4 rounded-3 h-100 hover-shadow transition">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="text-muted small fw-semibold text-uppercase">Total Reservations</div>
+                            <div class="fs-3 fw-bold text-dark">{{ total_count }}</div>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 text-primary p-3 rounded-circle">
+                            <i class="bi bi-journal-text fs-3"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- Filter Bar -->
+<div class="card shadow-sm border-0 rounded-3 mb-4">
+    <div class="card-body p-3">
+        <form method="get" class="row g-2 align-items-center">
+            <!-- Search Keyword -->
+            <div class="col-md-4">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+                    <input type="text" name="q" value="{{ search_q }}" class="form-control" placeholder="Search by requester, resource, or purpose...">
+                </div>
+            </div>
+
+            <!-- Status Filter -->
+            <div class="col-sm-6 col-md-3">
+                <select name="status" class="form-select form-select-sm">
+                    <option value="">All Statuses</option>
+                    {% for code, label in statuses %}
+                        <option value="{{ code }}" {% if status_filter == code %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Resource Filter -->
+            <div class="col-sm-6 col-md-3">
+                <select name="resource" class="form-select form-select-sm">
+                    <option value="">All Resources</option>
+                    {% for r in resources %}
+                        <option value="{{ r.id }}" {% if selected_resource == r.id|stringformat:"s" %}selected{% endif %}>{{ r.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="col-md-2 d-flex gap-1">
+                <button type="submit" class="btn btn-primary btn-sm w-100">
+                    <i class="bi bi-funnel"></i> Filter
+                </button>
+                <a href="{% url 'bookings:manage_bookings' %}" class="btn btn-outline-secondary btn-sm" title="Clear Filters">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Bookings Queue Table -->
+<div class="card shadow-sm border-0 rounded-3 mb-4">
+    <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold">
+            <i class="bi bi-list-task me-2 text-primary"></i>Reservations Queue
+        </h5>
+        <span class="badge bg-light text-muted border">Showing {{ page_obj.start_index|default:0 }}-{{ page_obj.end_index|default:0 }} of {{ page_obj.paginator.count }}</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 8%;">ID</th>
+                        <th style="width: 22%;">Resource</th>
+                        <th style="width: 18%;">Requester</th>
+                        <th style="width: 20%;">Time Slot</th>
+                        <th style="width: 12%;">Status</th>
+                        <th style="width: 20%; text-align: center;">Workflow Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for bk in page_obj %}
+                    <tr>
+                        <td class="fw-bold text-muted">#{{ bk.id }}</td>
+                        <td>
+                            <a href="{% url 'resources:resource_detail' bk.resource.pk %}" class="text-dark fw-semibold text-decoration-none d-block">
+                                {{ bk.resource.name }}
+                            </a>
+                            <span class="small text-muted"><i class="bi bi-geo-alt me-1"></i>{{ bk.resource.location }}</span>
+                        </td>
+                        <td>
+                            <div class="fw-semibold text-dark"><i class="bi bi-person me-1"></i>{{ bk.user.username }}</div>
+                            <div class="small text-muted">{{ bk.user.email }}</div>
+                        </td>
+                        <td class="small">
+                            <div><strong>{{ bk.start_time|date:"M d, Y" }}</strong></div>
+                            <div class="text-muted">{{ bk.start_time|date:"H:i" }} – {{ bk.end_time|date:"H:i" }}</div>
+                            <div class="text-truncate" style="max-width: 180px;" title="{{ bk.purpose }}"><em>{{ bk.purpose }}</em></div>
+                        </td>
+                        <td>
+                            {% if bk.status == 'APPROVED' %}
+                                <span class="badge bg-success px-2 py-1"><i class="bi bi-check-circle me-1"></i>Approved</span>
+                            {% elif bk.status == 'PENDING' %}
+                                <span class="badge bg-warning text-dark px-2 py-1"><i class="bi bi-hourglass-split me-1"></i>Pending</span>
+                            {% elif bk.status == 'REJECTED' %}
+                                <span class="badge bg-danger px-2 py-1"><i class="bi bi-x-circle me-1"></i>Rejected</span>
+                            {% else %}
+                                <span class="badge bg-secondary px-2 py-1"><i class="bi bi-slash-circle me-1"></i>Cancelled</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <div class="d-flex justify-content-center gap-1">
+                                <a href="{% url 'bookings:booking_detail' bk.id %}" class="btn btn-sm btn-outline-secondary" title="View Details and Audit Trail">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+
+                                {% if bk.status == 'PENDING' %}
+                                    <!-- Approve Form Button -->
+                                    <form method="post" action="{% url 'bookings:approve_booking' bk.id %}" class="d-inline" onsubmit="return confirm('Approve booking #{{ bk.id }} for {{ bk.resource.name }}?');">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                        <button type="submit" class="btn btn-sm btn-success" title="Approve Booking">
+                                            <i class="bi bi-check-lg"></i> Approve
+                                        </button>
+                                    </form>
+
+                                    <!-- Reject Modal Trigger Button -->
+                                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#rejectModal{{ bk.id }}" title="Reject Booking">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+
+                                    <!-- Reject Reason Modal -->
+                                    <div class="modal fade" id="rejectModal{{ bk.id }}" tabindex="-1" aria-labelledby="rejectModalLabel{{ bk.id }}" aria-hidden="true">
+                                        <div class="modal-dialog text-start">
+                                            <div class="modal-content">
+                                                <form method="post" action="{% url 'bookings:reject_booking' bk.id %}">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                                    <div class="modal-header bg-danger text-white">
+                                                        <h6 class="modal-title" id="rejectModalLabel{{ bk.id }}">Reject Booking #{{ bk.id }}</h6>
+                                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p class="small text-muted mb-2">
+                                                            Rejecting this request will immediately release the time slot for other users.
+                                                        </p>
+                                                        <div class="mb-3">
+                                                            <label class="form-label small fw-semibold">Rejection Reason</label>
+                                                            <textarea name="reason" class="form-control" rows="3" placeholder="Provide reason (e.g. Schedule clash, unapproved event, maintenance)..." required></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                                                        <button type="submit" class="btn btn-danger btn-sm">Confirm Rejection</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                {% elif bk.status == 'APPROVED' %}
+                                    <a href="{% url 'bookings:cancel_booking' bk.id %}" class="btn btn-sm btn-outline-danger" title="Cancel this reservation">
+                                        <i class="bi bi-x-circle me-1"></i> Cancel
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            <i class="bi bi-check2-circle fs-1 text-success d-block mb-2"></i>
+                            <h5 class="fw-bold">No reservations match the filter criteria</h5>
+                            <p class="small text-muted mb-0">All pending approvals have been cleared.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Pagination -->
+{% if page_obj.has_other_pages %}
+<nav aria-label="Bookings management pagination" class="d-flex justify-content-center">
+    <ul class="pagination shadow-sm">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if selected_resource %}&resource={{ selected_resource }}{% endif %}{% if search_q %}&q={{ search_q }}{% endif %}">
+                    &laquo; Previous
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">&laquo; Previous</span></li>
+        {% endif %}
+
+        {% for p in page_obj.paginator.page_range %}
+            {% if p == page_obj.number %}
+                <li class="page-item active"><span class="page-link">{{ p }}</span></li>
+            {% elif p >= page_obj.number|add:'-2' and p <= page_obj.number|add:'2' %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ p }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if selected_resource %}&resource={{ selected_resource }}{% endif %}{% if search_q %}&q={{ search_q }}{% endif %}">
+                        {{ p }}
+                    </a>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if selected_resource %}&resource={{ selected_resource }}{% endif %}{% if search_q %}&q={{ search_q }}{% endif %}">
+                    Next &raquo;
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">Next &raquo;</span></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

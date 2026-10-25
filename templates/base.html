@@ -72,6 +72,13 @@
                                 <i class="bi bi-calendar-plus me-1"></i> Book Slot
                             </a>
                         </li>
+                        {% if is_admin_or_staff or is_resource_manager %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'manage_bookings' %}active{% endif %}" href="{% url 'bookings:manage_bookings' %}">
+                                <i class="bi bi-shield-check me-1"></i> Approvals Queue
+                            </a>
+                        </li>
+                        {% endif %}
                         {% if is_admin_or_staff %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'admin:index' %}" target="_blank">
