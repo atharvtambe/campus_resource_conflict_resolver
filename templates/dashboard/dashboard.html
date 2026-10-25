@@ -136,9 +136,18 @@
                         <td class="small text-truncate" style="max-width: 250px;">{{ req.purpose }}</td>
                         <td><span class="badge bg-warning text-dark">Pending</span></td>
                         <td>
-                            <a href="{% url 'admin:bookings_booking_change' req.id %}" class="btn btn-sm btn-outline-primary">
-                                Review in Admin
-                            </a>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'bookings:booking_detail' req.id %}" class="btn btn-outline-primary" title="Review & Take Action">
+                                    Review
+                                </a>
+                                <form method="post" action="{% url 'bookings:approve_booking' req.id %}" class="d-inline" onsubmit="return confirm('Approve booking #{{ req.id }}?');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{% url 'dashboard' %}">
+                                    <button type="submit" class="btn btn-success" title="Quick Approve">
+                                        <i class="bi bi-check-lg"></i>
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                     {% empty %}
