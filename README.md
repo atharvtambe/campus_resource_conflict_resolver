@@ -42,7 +42,7 @@ campus_resource_conflict_resolver/
 
 ---
 
-## Phase 1, 2, 3 & 4 Completed Deliverables
+## Phase 1, 2, 3, 4 & 5 Completed Deliverables
 
 ### Phase 1: Environment and Project Setup
 1. **Virtual Environment**: Python venv configured and activated.
@@ -117,8 +117,25 @@ campus_resource_conflict_resolver/
    - Status filtering pills: All, Pending, Approved, Cancelled, Rejected.
    - Details view (`/bookings/<id>/`) showing complete reservation info and full audit trail timeline of status transitions.
    - Eligible cancellation workflow (`/bookings/<id>/cancel/`): Allows users to cancel their own pending/approved reservations with optional reason logging into `BookingHistory`.
-6. **Automated Test Suite**:
-   - 42 tests passing across models, services, auth, resource filtering, availability schedules, booking forms, conflict validation, and cancellations (`Ran 42 tests in 76.225s - OK`).
+
+### Phase 5: Conflict Detection, Workflow & Concurrency Control
+1. **Concurrency Control with Row-Level Locking (`bookings/services.py`)**:
+   - `create_booking_atomic`: Uses `transaction.atomic()` and `Resource.objects.select_for_update()` to serialize simultaneous booking requests on MySQL (InnoDB row locks).
+   - Prevents check-then-insert race conditions: when two requests arrive simultaneously for the exact same slot, the first obtains the lock and succeeds, while the second is blocked and immediately rejected with `BookingConflictError`.
+2. **Approval & Rejection Workflows**:
+   - `approve_booking_atomic` (`/bookings/<id>/approve/`): Concurrency-safe approval. Checks for any conflicting approved booking under row lock before confirming status as `APPROVED`.
+   - `reject_booking_atomic` (`/bookings/<id>/reject/`): Changes status to `REJECTED`, records reason in audit history, and automatically releases the time slot for other users.
+   - `cancel_booking_atomic` (`/bookings/<id>/cancel/`): Transitions status to `CANCELLED`, records remarks, and releases slot.
+3. **Central Approval Queue (`/bookings/manage/`)**:
+   - Dedicated review workbench for administrators and resource managers.
+   - Real-time status tabs (Pending Review, Approved, All), resource filters, and search.
+   - 1-click Approve with remarks and Reject modal with required reason.
+4. **Audit Trail Tracking (`BookingHistory`)**:
+   - Every status change records `booking`, `changed_by`, `old_status`, `new_status`, timestamp `changed_at`, and `remarks`.
+   - Visual timeline rendered in booking detail view and review screens.
+5. **Automated Verification & Concurrency Tests**:
+   - 48 automated tests passing (`Ran 48 tests in 43.805s - OK`).
+   - Includes multithreaded concurrency test with simultaneous competing threads attempting the exact same slot: verified that exactly 1 succeeds and 1 receives `BookingConflictError`.
 
 ---
 
