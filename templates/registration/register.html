@@ -30,7 +30,7 @@
 
                 <!-- Username -->
                 <div class="mb-3">
-                    <label for="{{ form.username.id_for_label }}" class="form-label small fw-semibold text-muted">
+                    <label for="{{ form.username.id_for_label }}" class="form-label small fw-semibold text-white">
                         Username <span class="text-danger">*</span>
                     </label>
                     <div class="input-group">
@@ -44,7 +44,7 @@
 
                 <!-- Email -->
                 <div class="mb-3">
-                    <label for="{{ form.email.id_for_label }}" class="form-label small fw-semibold text-muted">
+                    <label for="{{ form.email.id_for_label }}" class="form-label small fw-semibold text-white">
                         Campus Email <span class="text-danger">*</span>
                     </label>
                     <div class="input-group">
@@ -59,14 +59,14 @@
                 <!-- First & Last Name -->
                 <div class="row g-2 mb-3">
                     <div class="col-sm-6">
-                        <label for="{{ form.first_name.id_for_label }}" class="form-label small fw-semibold text-muted">First Name</label>
+                        <label for="{{ form.first_name.id_for_label }}" class="form-label small fw-semibold text-white">First Name</label>
                         {{ form.first_name }}
                         {% if form.first_name.errors %}
                             <div class="text-danger small mt-1">{{ form.first_name.errors.0 }}</div>
                         {% endif %}
                     </div>
                     <div class="col-sm-6">
-                        <label for="{{ form.last_name.id_for_label }}" class="form-label small fw-semibold text-muted">Last Name</label>
+                        <label for="{{ form.last_name.id_for_label }}" class="form-label small fw-semibold text-white">Last Name</label>
                         {{ form.last_name }}
                         {% if form.last_name.errors %}
                             <div class="text-danger small mt-1">{{ form.last_name.errors.0 }}</div>
@@ -76,7 +76,7 @@
 
                 <!-- Role Selection -->
                 <div class="mb-3">
-                    <label for="{{ form.role.id_for_label }}" class="form-label small fw-semibold text-muted">
+                    <label for="{{ form.role.id_for_label }}" class="form-label small fw-semibold text-white">
                         Campus Role <span class="text-danger">*</span>
                     </label>
                     <div class="input-group">
@@ -90,7 +90,7 @@
 
                 <!-- Password -->
                 <div class="mb-3">
-                    <label for="{{ form.password.id_for_label }}" class="form-label small fw-semibold text-muted">
+                    <label for="{{ form.password.id_for_label }}" class="form-label small fw-semibold text-white">
                         Password <span class="text-danger">*</span>
                     </label>
                     <div class="input-group">
@@ -104,7 +104,7 @@
 
                 <!-- Confirm Password -->
                 <div class="mb-4">
-                    <label for="{{ form.confirm_password.id_for_label }}" class="form-label small fw-semibold text-muted">
+                    <label for="{{ form.confirm_password.id_for_label }}" class="form-label small fw-semibold text-white">
                         Confirm Password <span class="text-danger">*</span>
                     </label>
                     <div class="input-group">

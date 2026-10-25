@@ -54,18 +54,18 @@
             <tbody>
                 {% for bk in page_obj %}
                     <tr>
-                        <td class="fw-bold text-muted">#{{ bk.id }}</td>
+                        <td class="fw-bold text-white">#{{ bk.id }}</td>
                         <td>
                             <a href="{% url 'resources:resource_detail' bk.resource.pk %}" class="fw-semibold text-white text-decoration-none d-block">
                                 {{ bk.resource.name }}
                             </a>
-                            <span class="small text-muted"><i class="bi bi-geo-alt me-1 text-warning"></i>{{ bk.resource.location }}</span>
+                            <span class="small text-secondary"><i class="bi bi-geo-alt me-1 text-warning"></i>{{ bk.resource.location }}</span>
                         </td>
                         <td>
                             <div class="fw-semibold text-white">{{ bk.start_time|date:"M d, Y" }}</div>
-                            <div class="small text-muted">{{ bk.start_time|date:"H:i" }} &ndash; {{ bk.end_time|date:"H:i" }}</div>
+                            <div class="small text-secondary">{{ bk.start_time|date:"H:i" }} &ndash; {{ bk.end_time|date:"H:i" }}</div>
                         </td>
-                        <td class="small text-muted text-truncate" style="max-width: 200px;">
+                        <td class="small text-secondary text-truncate" style="max-width: 200px;">
                             {{ bk.purpose }}
                         </td>
                         <td>

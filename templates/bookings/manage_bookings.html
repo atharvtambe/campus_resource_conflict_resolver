@@ -145,20 +145,20 @@
                 <tbody>
                     {% for bk in page_obj %}
                     <tr>
-                        <td class="fw-bold text-muted">#{{ bk.id }}</td>
+                        <td class="fw-bold text-white">#{{ bk.id }}</td>
                         <td>
                             <a href="{% url 'resources:resource_detail' bk.resource.pk %}" class="text-white fw-semibold text-decoration-none d-block">
                                 {{ bk.resource.name }}
                             </a>
-                            <span class="small text-muted"><i class="bi bi-geo-alt me-1 text-warning"></i>{{ bk.resource.location }}</span>
+                            <span class="small text-secondary"><i class="bi bi-geo-alt me-1 text-warning"></i>{{ bk.resource.location }}</span>
                         </td>
                         <td>
                             <div class="fw-semibold text-white"><i class="bi bi-person me-1 text-secondary"></i>{{ bk.user.username }}</div>
-                            <div class="small text-muted">{{ bk.user.email }}</div>
+                            <div class="small text-secondary">{{ bk.user.email }}</div>
                         </td>
                         <td class="small">
                             <div class="text-white fw-semibold">{{ bk.start_time|date:"M d, Y" }}</div>
-                            <div class="text-muted">{{ bk.start_time|date:"H:i" }} – {{ bk.end_time|date:"H:i" }}</div>
+                            <div class="text-secondary">{{ bk.start_time|date:"H:i" }} – {{ bk.end_time|date:"H:i" }}</div>
                             <div class="text-truncate text-secondary" style="max-width: 200px;" title="{{ bk.purpose }}"><em>{{ bk.purpose }}</em></div>
                         </td>
                         <td>
