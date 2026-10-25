@@ -1,180 +1,175 @@
 {% extends "base.html" %}
 
-{% block title %}{{ resource.name }} - Resource Details & Availability{% endblock %}
+{% block title %}{{ resource.name }} - Schedule & Details{% endblock %}
 
 {% block content %}
-<div class="mb-3">
-    <a href="{% url 'resources:resource_list' %}" class="text-decoration-none text-muted small">
-        <i class="bi bi-arrow-left me-1"></i> Back to all resources
+<div class="mb-4">
+    <a href="{% url 'resources:resource_list' %}" class="btn btn-glass btn-pill btn-sm d-inline-flex align-items-center gap-1">
+        <i class="bi bi-arrow-left"></i> All Resources
     </a>
 </div>
 
-<!-- Header Card -->
-<div class="card shadow-sm border-0 rounded-3 mb-4">
-    <div class="card-body p-4">
-        <div class="row align-items-center">
-            <div class="col-lg-8">
-                <div class="d-flex align-items-center gap-2 mb-2">
-                    <span class="badge 
-                        {% if resource.resource_type == 'LAB' %}bg-primary
-                        {% elif resource.resource_type == 'SEMINAR_HALL' %}bg-info text-dark
-                        {% elif resource.resource_type == 'CLASSROOM' %}bg-secondary
-                        {% elif resource.resource_type == 'PROJECTOR' %}bg-warning text-dark
-                        {% elif resource.resource_type == 'EQUIPMENT' %}bg-dark
-                        {% else %}bg-secondary{% endif %} px-2 py-1">
-                        {{ resource.get_resource_type_display }}
+<!-- Resource Specifications Card -->
+<div class="glass-panel p-4 p-md-5 mb-4 position-relative overflow-hidden">
+    <!-- Ambient Corner Spotlight -->
+    <div style="position: absolute; top: -50px; right: -50px; width: 220px; height: 220px; background: radial-gradient(circle, rgba(245, 158, 11, 0.25) 0%, transparent 70%); filter: blur(35px); pointer-events: none;"></div>
+
+    <div class="row align-items-center g-4">
+        <div class="col-lg-8">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <span class="badge 
+                    {% if resource.resource_type == 'LAB' %}badge-cyan
+                    {% elif resource.resource_type == 'SEMINAR_HALL' %}badge-gold
+                    {% elif resource.resource_type == 'CLASSROOM' %}badge-glass
+                    {% elif resource.resource_type == 'PROJECTOR' %}badge-emerald
+                    {% else %}badge-glass{% endif %}">
+                    {{ resource.get_resource_type_display }}
+                </span>
+                {% if resource.is_active %}
+                    <span class="badge badge-emerald">
+                        <i class="bi bi-check-circle me-1"></i>Active & Bookable
                     </span>
-                    {% if resource.is_active %}
-                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1">
-                            <i class="bi bi-check-circle me-1"></i>Active & Bookable
-                        </span>
-                    {% else %}
-                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1">
-                            <i class="bi bi-slash-circle me-1"></i>Inactive / Unavailable
-                        </span>
-                    {% endif %}
-                </div>
-
-                <h2 class="fw-bold mb-2">{{ resource.name }}</h2>
-
-                <div class="d-flex flex-wrap gap-4 text-muted small mb-3">
-                    <div><i class="bi bi-geo-alt-fill text-danger me-1"></i><strong>Location:</strong> {{ resource.location }}</div>
-                    <div><i class="bi bi-people-fill text-primary me-1"></i><strong>Capacity:</strong> {{ resource.capacity }} persons/units</div>
-                </div>
-
-                <p class="text-secondary mb-0">
-                    {{ resource.description|default:"No specific instructions or facility equipment notes recorded for this resource."|linebreaks }}
-                </p>
+                {% else %}
+                    <span class="badge badge-rose">
+                        <i class="bi bi-slash-circle me-1"></i>Inactive / Offline
+                    </span>
+                {% endif %}
             </div>
 
-            <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
-                <div class="d-flex flex-column flex-sm-row flex-lg-column gap-2 justify-content-lg-end">
-                    {% if resource.is_active %}
-                        <a href="{% url 'bookings:create_booking_for_resource' resource.pk %}" class="btn btn-primary btn-lg shadow-sm">
-                            <i class="bi bi-calendar-plus me-1"></i> Reserve This Resource
-                        </a>
-                    {% else %}
-                        <button class="btn btn-secondary btn-lg" disabled>
-                            <i class="bi bi-slash-circle me-1"></i> Inactive for Bookings
-                        </button>
-                    {% endif %}
+            <h2 class="display-6 fw-bold text-white mb-3" style="letter-spacing: -0.5px;">{{ resource.name }}</h2>
 
-                    {% if can_manage %}
-                        <div class="d-flex gap-2">
-                            <a href="{% url 'resources:resource_edit' resource.pk %}" class="btn btn-outline-secondary w-100">
-                                <i class="bi bi-pencil-square me-1"></i> Edit Details
-                            </a>
-                            <a href="{% url 'resources:resource_block_create' resource.pk %}" class="btn btn-outline-warning w-100 text-dark">
-                                <i class="bi bi-wrench me-1"></i> Maintenance
-                            </a>
-                        </div>
-                    {% endif %}
-                </div>
+            <div class="d-flex flex-wrap gap-4 text-muted small mb-3">
+                <div><i class="bi bi-geo-alt text-warning me-1"></i><strong>Location:</strong> {{ resource.location }}</div>
+                <div><i class="bi bi-people text-info me-1"></i><strong>Capacity:</strong> {{ resource.capacity }} persons/units</div>
+            </div>
+
+            <p class="text-secondary mb-0">
+                {{ resource.description|default:"Standard academic campus facility with presentation equipment."|linebreaks }}
+            </p>
+        </div>
+
+        <div class="col-lg-4 text-lg-end">
+            <div class="d-flex flex-column flex-sm-row flex-lg-column gap-2 justify-content-lg-end">
+                {% if resource.is_active %}
+                    <a href="{% url 'bookings:create_booking_for_resource' resource.pk %}" class="btn btn-gold btn-pill py-2 px-4 shadow">
+                        <i class="bi bi-calendar-plus me-1"></i> Reserve This Resource
+                    </a>
+                {% else %}
+                    <button class="btn btn-glass btn-pill text-muted" disabled>
+                        <i class="bi bi-slash-circle me-1"></i> Currently Inactive
+                    </button>
+                {% endif %}
+
+                {% if can_manage %}
+                    <div class="d-flex gap-2 justify-content-lg-end mt-1">
+                        <a href="{% url 'resources:resource_edit' resource.pk %}" class="btn btn-glass btn-pill btn-sm">
+                            <i class="bi bi-pencil-square me-1"></i> Edit
+                        </a>
+                        <a href="{% url 'resources:resource_block_create' resource.pk %}" class="btn btn-glass btn-pill btn-sm text-warning">
+                            <i class="bi bi-wrench me-1"></i> Block Time
+                        </a>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
 
-<!-- Date-Specific Availability Section -->
-<div class="card shadow-sm border-0 rounded-3 mb-4">
-    <div class="card-header bg-white py-3 border-bottom d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+<!-- Date-Specific Schedule Section -->
+<div class="glass-panel p-4 mb-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 pb-3 border-bottom" style="border-color: rgba(255, 255, 255, 0.08) !important;">
         <div>
-            <h5 class="mb-1 fw-bold"><i class="bi bi-clock-history text-primary me-2"></i>Date-Specific Availability</h5>
-            <div class="text-muted small">Checking schedule for <strong>{{ selected_date|date:"l, F j, Y" }}</strong></div>
+            <h5 class="fw-bold mb-1 text-white">
+                <i class="bi bi-calendar-range text-warning me-2"></i>Date-Specific Availability
+            </h5>
+            <div class="text-muted small">Schedule on <strong>{{ selected_date|date:"l, F j, Y" }}</strong></div>
         </div>
 
         <!-- Date navigation form -->
         <form method="get" class="d-flex align-items-center gap-2">
-            <a href="?date={{ prev_date|date:'Y-m-d' }}" class="btn btn-outline-secondary btn-sm" title="Previous Day">
+            <a href="?date={{ prev_date|date:'Y-m-d' }}" class="btn btn-glass btn-pill-icon btn-sm" title="Previous Day">
                 <i class="bi bi-chevron-left"></i>
             </a>
 
-            <input type="date" name="date" value="{{ selected_date|date:'Y-m-d' }}" class="form-control form-control-sm" onchange="this.form.submit()">
+            <input type="date" name="date" value="{{ selected_date|date:'Y-m-d' }}" class="form-control form-control-sm" style="max-width: 170px;" onchange="this.form.submit()">
 
-            <a href="?date={{ next_date|date:'Y-m-d' }}" class="btn btn-outline-secondary btn-sm" title="Next Day">
+            <a href="?date={{ next_date|date:'Y-m-d' }}" class="btn btn-glass btn-pill-icon btn-sm" title="Next Day">
                 <i class="bi bi-chevron-right"></i>
             </a>
 
             {% if selected_date != today %}
-                <a href="?date={{ today|date:'Y-m-d' }}" class="btn btn-light btn-sm border text-muted">
+                <a href="?date={{ today|date:'Y-m-d' }}" class="btn btn-glass btn-pill btn-sm">
                     Today
                 </a>
             {% endif %}
         </form>
     </div>
 
-    <div class="card-body p-4">
-        <!-- Maintenance Blocks Alert -->
-        {% if blocks_on_date %}
-            <div class="alert alert-warning mb-4">
-                <h6 class="fw-bold mb-2"><i class="bi bi-exclamation-triangle-fill me-2"></i>Scheduled Maintenance on this Date:</h6>
-                <ul class="mb-0 ps-3">
-                    {% for block in blocks_on_date %}
-                        <li>
-                            <strong>{{ block.start_time|date:"H:i" }} – {{ block.end_time|date:"H:i" }}</strong>: {{ block.reason }}
-                        </li>
-                    {% endfor %}
-                </ul>
-            </div>
-        {% endif %}
+    <!-- Maintenance Blocks Warning -->
+    {% if blocks_on_date %}
+        <div class="alert alert-warning mb-4">
+            <h6 class="fw-bold mb-2"><i class="bi bi-exclamation-triangle-fill me-2"></i>Maintenance Window Scheduled:</h6>
+            <ul class="mb-0 ps-3 small">
+                {% for block in blocks_on_date %}
+                    <li>
+                        <strong>{{ block.start_time|date:"H:i" }} &ndash; {{ block.end_time|date:"H:i" }}</strong>: {{ block.reason }}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
 
-        <!-- Bookings on Date -->
-        <h6 class="fw-bold text-muted text-uppercase small mb-3">Reservations on {{ selected_date|date:"M j, Y" }}</h6>
-
-        {% if bookings_on_date %}
-            <div class="table-responsive">
-                <table class="table table-bordered align-middle">
-                    <thead class="table-light">
+    <!-- Bookings on this Date -->
+    {% if bookings_on_date %}
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th style="width: 25%;">Reserved Time Slot</th>
+                        <th style="width: 20%;">Status</th>
+                        <th style="width: 35%;">Purpose</th>
+                        <th style="width: 20%;">Requester</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for bk in bookings_on_date %}
                         <tr>
-                            <th style="width: 25%;">Reserved Time Slot</th>
-                            <th style="width: 20%;">Status</th>
-                            <th style="width: 35%;">Purpose</th>
-                            <th style="width: 20%;">Requester</th>
+                            <td class="fw-bold text-white">
+                                <i class="bi bi-clock text-warning me-1"></i>
+                                {{ bk.start_time|date:"H:i" }} &ndash; {{ bk.end_time|date:"H:i" }}
+                                <div class="text-muted fw-normal" style="font-size: 0.75rem;">Half-open [start, end)</div>
+                            </td>
+                            <td>
+                                {% if bk.status == 'APPROVED' %}
+                                    <span class="badge badge-emerald">Approved</span>
+                                {% elif bk.status == 'PENDING' %}
+                                    <span class="badge badge-gold">Pending</span>
+                                {% endif %}
+                            </td>
+                            <td class="small text-muted">{{ bk.purpose }}</td>
+                            <td class="small text-muted">
+                                {% if user.is_authenticated and user == bk.user or can_manage %}
+                                    <span class="text-white">{{ bk.user.username }}</span>
+                                {% else %}
+                                    <span>Campus Reservation</span>
+                                {% endif %}
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        {% for bk in bookings_on_date %}
-                            <tr>
-                                <td class="fw-bold text-dark">
-                                    <i class="bi bi-clock me-1 text-primary"></i>
-                                    {{ bk.start_time|date:"H:i" }} – {{ bk.end_time|date:"H:i" }}
-                                    <div class="small fw-normal text-muted">Half-open [start, end)</div>
-                                </td>
-                                <td>
-                                    {% if bk.status == 'APPROVED' %}
-                                        <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Approved</span>
-                                    {% elif bk.status == 'PENDING' %}
-                                        <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i>Pending</span>
-                                    {% endif %}
-                                </td>
-                                <td class="small">{{ bk.purpose }}</td>
-                                <td class="small text-muted">
-                                    {% if user.is_authenticated and user == bk.user or can_manage %}
-                                        <span class="text-dark fw-semibold">{{ bk.user.username }}</span>
-                                    {% else %}
-                                        <span class="text-muted">Reserved by Campus User</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            <div class="alert alert-info py-2 small mb-0 mt-3">
-                <i class="bi bi-info-circle me-1"></i> Notice: New reservations cannot overlap with pending or approved slots. Adjacent slots starting exactly when a previous one ends (e.g. 11:00) are permitted.
-            </div>
-        {% else %}
-            <div class="text-center py-4 bg-light rounded-3 border">
-                <i class="bi bi-calendar-check fs-1 text-success d-block mb-2"></i>
-                <h5 class="fw-bold text-success mb-1">Resource is Available All Day!</h5>
-                <p class="text-muted small mb-3">No conflicting reservations or maintenance windows are scheduled for this date.</p>
-                {% if resource.is_active %}
-                    <a href="{% url 'bookings:create_booking_for_resource' resource.pk %}" class="btn btn-outline-primary btn-sm">
-                        <i class="bi bi-plus-lg me-1"></i> Book a Time Slot on this Day
-                    </a>
-                {% endif %}
-            </div>
-        {% endif %}
-    </div>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="text-center py-5 glass-panel" style="background: rgba(255, 255, 255, 0.02) !important;">
+            <i class="bi bi-calendar-check fs-1 text-warning d-block mb-2"></i>
+            <h5 class="fw-bold text-white mb-1">Available All Day</h5>
+            <p class="text-muted small mb-3">No conflicting reservations or maintenance windows are scheduled for this date.</p>
+            {% if resource.is_active %}
+                <a href="{% url 'bookings:create_booking_for_resource' resource.pk %}" class="btn btn-gold btn-pill btn-sm">
+                    <i class="bi bi-plus-lg me-1"></i> Book a Time Slot on this Day
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
 </div>
 {% endblock %}

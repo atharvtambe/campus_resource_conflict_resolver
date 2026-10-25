@@ -5,27 +5,29 @@
 {% block content %}
 <div class="row justify-content-center py-5">
     <div class="col-md-7 col-lg-6 text-center">
-        <div class="card shadow border-0 rounded-3 p-4">
+        <div class="card glass-panel p-4">
             <div class="card-body">
-                <i class="bi bi-shield-x text-danger display-1 mb-3"></i>
+                <div class="d-inline-flex p-3 rounded-circle mb-3" style="background: rgba(244, 63, 94, 0.15); color: var(--accent-rose);">
+                    <i class="bi bi-shield-x display-3"></i>
+                </div>
                 <h2 class="fw-bold text-danger mb-2">403 - Access Denied</h2>
-                <p class="text-muted lead mb-4">
+                <p class="text-secondary lead mb-4">
                     {% if exception %}
                         {{ exception }}
                     {% else %}
                         You do not have permission to access this resource or perform this administrative action.
                     {% endif %}
                 </p>
-                <div class="alert alert-light border small text-muted text-start mb-4">
-                    <strong>Current Role:</strong> <span class="badge bg-secondary">{{ user_role }}</span><br>
-                    <strong>User:</strong> {{ user.username }} ({{ user.email }})<br>
-                    If you believe you should have access, please contact a campus system administrator.
+                <div class="p-3 rounded-3 small text-secondary text-start mb-4" style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-subtle);">
+                    <div class="mb-1"><strong class="text-white">Current Role:</strong> <span class="badge-glass ms-1">{{ user_role }}</span></div>
+                    <div class="mb-1"><strong class="text-white">User:</strong> {{ user.username }} ({{ user.email }})</div>
+                    <div class="text-muted mt-2">If you believe you should have access, please contact a campus system administrator.</div>
                 </div>
                 <div class="d-flex justify-content-center gap-2">
-                    <a href="{% url 'dashboard' %}" class="btn btn-primary px-4">
+                    <a href="{% url 'dashboard' %}" class="btn btn-gold btn-pill px-4">
                         <i class="bi bi-speedometer2 me-1"></i> Go to Dashboard
                     </a>
-                    <a href="{% url 'logout' %}" class="btn btn-outline-secondary px-3">
+                    <a href="{% url 'logout' %}" class="btn btn-glass btn-pill px-3">
                         <i class="bi bi-box-arrow-right me-1"></i> Switch Account
                     </a>
                 </div>

@@ -1,192 +1,189 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Campus Resource Conflict Resolver{% endblock %}</title>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <style>
-        body {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            background-color: #f8fafc;
-            color: #1e293b;
-        }
-        .navbar-brand {
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-        .role-badge {
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 600;
-        }
-        .main-container {
-            flex: 1;
-        }
-        footer {
-            margin-top: auto;
-            border-top: 1px solid #e2e8f0;
-            background: #ffffff;
-        }
-    </style>
+    <!-- Luxury Dark Theme CSS -->
+    <link rel="stylesheet" href="{% static 'css/dark_theme.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
-        <div class="container">
-            <a class="navbar-brand text-white d-flex align-items-center gap-2" href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'login' %}{% endif %}">
-                <i class="bi bi-calendar2-range text-info fs-4"></i>
-                <span>Campus Resolver</span>
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+    <!-- Top Sleek Header Navigation (Screenshot Inspired) -->
+    <header class="py-3 px-3 px-md-4 border-bottom" style="border-color: rgba(255, 255, 255, 0.06) !important; background: rgba(12, 14, 18, 0.85); backdrop-filter: blur(20px); position: sticky; top: 0; z-index: 1030;">
+        <div class="container-fluid max-w-7xl d-flex align-items-center justify-content-between">
+            <!-- Brand Logo with Golden Glow Emblem -->
+            <div class="d-flex align-items-center gap-3">
+                <a href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'login' %}{% endif %}" class="d-flex align-items-center text-decoration-none">
+                    <div style="width: 36px; height: 36px; border-radius: 12px; background: linear-gradient(135deg, #f59e0b, #b45309); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(245, 158, 11, 0.45); color: #000; font-weight: 800; font-size: 1.1rem;">
+                        CR
+                    </div>
+                </a>
 
-            <div class="collapse navbar-collapse" id="navbarContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.app_name == 'resources' %}active{% endif %}" href="{% url 'resources:resource_list' %}">
-                            <i class="bi bi-grid-3x3-gap me-1"></i> Resources
+                <!-- Horizontal Navigation Tabs (Overview, Resources, Bookings...) -->
+                <nav class="d-none d-md-flex align-items-center gap-1 ms-2">
+                    <a href="{% url 'dashboard' %}" class="nav-tab-pill {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                        Overview
+                    </a>
+                    <a href="{% url 'resources:resource_list' %}" class="nav-tab-pill {% if request.resolver_match.app_name == 'resources' %}active{% endif %}">
+                        Resources
+                    </a>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'bookings:my_bookings' %}" class="nav-tab-pill {% if request.resolver_match.url_name == 'my_bookings' %}active{% endif %}">
+                            My Bookings
                         </a>
-                    </li>
-                    {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
-                                <i class="bi bi-speedometer2 me-1"></i> Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.resolver_match.url_name == 'my_bookings' %}active{% endif %}" href="{% url 'bookings:my_bookings' %}">
-                                <i class="bi bi-journal-bookmark me-1"></i> My Bookings
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.resolver_match.url_name == 'create_booking' %}active{% endif %}" href="{% url 'bookings:create_booking' %}">
-                                <i class="bi bi-calendar-plus me-1"></i> Book Slot
-                            </a>
-                        </li>
                         {% if is_admin_or_staff or is_resource_manager %}
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.resolver_match.url_name == 'manage_bookings' %}active{% endif %}" href="{% url 'bookings:manage_bookings' %}">
-                                <i class="bi bi-shield-check me-1"></i> Approvals Queue
+                            <a href="{% url 'bookings:manage_bookings' %}" class="nav-tab-pill {% if request.resolver_match.url_name == 'manage_bookings' %}active{% endif %}">
+                                Approvals Queue
                             </a>
-                        </li>
-                        {% endif %}
-                        {% if is_admin_or_staff %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'admin:index' %}" target="_blank">
-                                <i class="bi bi-shield-lock me-1"></i> Django Admin
-                            </a>
-                        </li>
                         {% endif %}
                     {% endif %}
-                </ul>
+                </nav>
+            </div>
 
-                <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
-                    {% if user.is_authenticated %}
-                        <!-- Role Badge -->
-                        <li class="nav-item">
+            <!-- Right Controls: Action Pills, Notifications & User Pill -->
+            <div class="d-flex align-items-center gap-2 gap-md-3">
+                {% if user.is_authenticated %}
+                    <!-- Quick Reserve Button -->
+                    <a href="{% url 'bookings:create_booking' %}" class="btn btn-glass btn-pill d-none d-sm-inline-flex align-items-center gap-2">
+                        <i class="bi bi-plus-lg text-warning"></i>
+                        <span>Reserve</span>
+                    </a>
+
+                    {% if is_admin_or_staff %}
+                        <a href="{% url 'admin:index' %}" target="_blank" class="btn btn-glass btn-pill d-none d-lg-inline-flex align-items-center gap-1 text-muted" title="Open Django Admin">
+                            <i class="bi bi-shield-lock"></i>
+                            <span>Admin</span>
+                        </a>
+                    {% endif %}
+
+                    <!-- Notifications Glass Pill -->
+                    <a href="{% if is_admin_or_staff or is_resource_manager %}{% url 'bookings:manage_bookings' %}{% else %}{% url 'bookings:my_bookings' %}{% endif %}" class="btn btn-glass btn-pill-icon position-relative text-white" title="Notifications">
+                        <i class="bi bi-bell"></i>
+                        {% if pending_bookings and is_admin_or_staff %}
+                            <span class="position-absolute top-0 start-100 translate-middle p-1 bg-warning border border-dark rounded-circle">
+                                <span class="visually-hidden">New alerts</span>
+                            </span>
+                        {% endif %}
+                    </a>
+
+                    <!-- User Profile Pill Card (Screenshot Style) -->
+                    <div class="dropdown">
+                        <button class="btn btn-glass btn-pill d-flex align-items-center gap-2 ps-2 pe-3" type="button" id="userMenuDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div style="width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #e2e8f0, #94a3b8); display: flex; align-items: center; justify-content: center; color: #0f172a; font-weight: 700; font-size: 0.75rem;">
+                                {{ user.username|slice:":2"|upper }}
+                            </div>
+                            <span class="fw-semibold text-white small d-none d-md-inline">{{ user.first_name|default:user.username }}</span>
                             {% if user_role == 'Administrator' %}
-                                <span class="badge bg-danger role-badge px-2 py-1"><i class="bi bi-shield-fill me-1"></i>Admin</span>
+                                <span class="badge badge-rose small d-none d-lg-inline">Admin</span>
                             {% elif user_role == 'Resource Manager' %}
-                                <span class="badge bg-warning text-dark role-badge px-2 py-1"><i class="bi bi-gear-fill me-1"></i>Manager</span>
+                                <span class="badge badge-gold small d-none d-lg-inline">Manager</span>
                             {% elif user_role == 'Faculty' %}
-                                <span class="badge bg-success role-badge px-2 py-1"><i class="bi bi-mortarboard-fill me-1"></i>Faculty</span>
+                                <span class="badge badge-emerald small d-none d-lg-inline">Faculty</span>
                             {% else %}
-                                <span class="badge bg-primary role-badge px-2 py-1"><i class="bi bi-person-fill me-1"></i>Student</span>
+                                <span class="badge badge-cyan small d-none d-lg-inline">Student</span>
                             {% endif %}
-                        </li>
+                            <i class="bi bi-chevron-down text-muted small ms-1"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userMenuDropdown">
+                            <li class="px-3 py-2 border-bottom" style="border-color: rgba(255, 255, 255, 0.08) !important;">
+                                <div class="fw-bold text-white">{{ user.get_full_name|default:user.username }}</div>
+                                <div class="small text-muted">{{ user.email }}</div>
+                                <div class="mt-1"><span class="badge badge-gold">{{ user_role }}</span></div>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center gap-2 mt-1" href="{% url 'dashboard' %}">
+                                    <i class="bi bi-speedometer2 text-warning"></i> Dashboard
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'bookings:my_bookings' %}">
+                                    <i class="bi bi-journal-bookmark text-info"></i> My Reservations
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'password_change' %}">
+                                    <i class="bi bi-key text-secondary"></i> Change Password
+                                </a>
+                            </li>
+                            {% if is_admin_or_staff %}
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'admin:index' %}" target="_blank">
+                                    <i class="bi bi-sliders text-danger"></i> Admin Console
+                                </a>
+                            </li>
+                            {% endif %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item text-danger d-flex align-items-center gap-2" href="{% url 'logout' %}">
+                                    <i class="bi bi-box-arrow-right"></i> Sign Out
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
 
-                        <!-- User Profile Dropdown -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-light d-flex align-items-center gap-1" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-person-circle fs-5"></i>
-                                <span>{{ user.username }}</span>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
-                                <li class="dropdown-header">
-                                    <strong>{{ user.get_full_name|default:user.username }}</strong>
-                                    <div class="small text-muted">{{ user.email }}</div>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'password_change' %}">
-                                        <i class="bi bi-key me-2"></i> Change Password
-                                    </a>
-                                </li>
-                                {% if is_admin_or_staff %}
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'admin:index' %}">
-                                        <i class="bi bi-sliders me-2"></i> Admin Console
-                                    </a>
-                                </li>
-                                {% endif %}
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item text-danger" href="{% url 'logout' %}">
-                                        <i class="bi bi-box-arrow-right me-2"></i> Logout
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                    {% else %}
-                        <li class="nav-item">
-                            <a class="btn btn-outline-light btn-sm" href="{% url 'login' %}">
-                                <i class="bi bi-box-arrow-in-right me-1"></i> Log In
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="btn btn-info btn-sm text-dark fw-semibold" href="{% url 'register' %}">
-                                <i class="bi bi-person-plus me-1"></i> Register
-                            </a>
-                        </li>
-                    {% endif %}
-                </ul>
+                {% else %}
+                    <!-- Anonymous Guest Options -->
+                    <a href="{% url 'login' %}" class="btn btn-glass btn-pill">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+                    </a>
+                    <a href="{% url 'register' %}" class="btn btn-gold btn-pill">
+                        <i class="bi bi-person-plus me-1"></i> Register
+                    </a>
+                {% endif %}
             </div>
         </div>
-    </nav>
+    </header>
 
-    <!-- Flash Messages -->
-    <div class="container mt-3">
+    <!-- Global Notification Messages -->
+    <div class="container-fluid max-w-7xl mt-3 px-3 px-md-4">
         {% if messages %}
             {% for message in messages %}
-                <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show shadow-sm" role="alert">
+                <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show d-flex align-items-center gap-2 py-3 px-4" role="alert">
                     {% if message.tags == 'error' %}
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <i class="bi bi-exclamation-triangle-fill text-danger fs-5"></i>
                     {% elif message.tags == 'success' %}
-                        <i class="bi bi-check-circle-fill me-2"></i>
+                        <i class="bi bi-check-circle-fill text-success fs-5"></i>
                     {% elif message.tags == 'warning' %}
-                        <i class="bi bi-exclamation-circle-fill me-2"></i>
+                        <i class="bi bi-exclamation-circle-fill text-warning fs-5"></i>
                     {% else %}
-                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <i class="bi bi-info-circle-fill text-info fs-5"></i>
                     {% endif %}
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <div class="flex-grow-1">{{ message }}</div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             {% endfor %}
         {% endif %}
     </div>
 
-    <!-- Main Content Area -->
-    <main class="main-container container py-4">
+    <!-- Main Dynamic Workspace View -->
+    <main class="container-fluid max-w-7xl py-4 px-3 px-md-4 flex-grow-1">
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Footer -->
-    <footer class="py-3 text-center text-muted small">
-        <div class="container">
-            <span>Campus Resource Conflict Resolver • Django 5.2 & MySQL • Pair Programming Portfolio Project</span>
+    <!-- Sleek Minimalist Footer -->
+    <footer class="py-4 border-top mt-auto" style="border-color: rgba(255, 255, 255, 0.06) !important; background: rgba(8, 9, 12, 0.7);">
+        <div class="container-fluid max-w-7xl px-3 px-md-4 d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2 small text-muted">
+            <div class="d-flex align-items-center gap-2">
+                <div style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 8px #10b981;"></div>
+                <span>Campus Resource Conflict Resolver &bull; Operational</span>
+            </div>
+            <div>
+                Django 5.2 LTS &bull; MySQL 8.0 &bull; High-Concurrency Engine
+            </div>
         </div>
     </footer>
 
-    <!-- Bootstrap 5 Bundle JS with Popper -->
+    <!-- Bootstrap 5 Bundle JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     {% block extra_js %}{% endblock %}
 </body>

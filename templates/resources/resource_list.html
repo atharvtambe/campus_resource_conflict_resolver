@@ -1,90 +1,91 @@
 {% extends "base.html" %}
 
-{% block title %}Browse Campus Resources - Campus Resource Conflict Resolver{% endblock %}
+{% block title %}Campus Resources - Campus Resource Conflict Resolver{% endblock %}
 
 {% block content %}
-<div class="row align-items-center mb-4">
+<div class="row align-items-center mb-4 g-3">
     <div class="col-md-8">
-        <h2 class="fw-bold mb-1"><i class="bi bi-grid-3x3-gap-fill text-primary me-2"></i>Campus Resources</h2>
-        <p class="text-muted mb-0">Browse and search laboratories, classrooms, seminar halls, and shared equipment.</p>
+        <div class="text-muted small text-uppercase fw-bold" style="letter-spacing: 1px;">
+            Facility Directory
+        </div>
+        <h2 class="fw-bold mb-1 text-white">Campus Resources</h2>
+        <p class="text-muted small mb-0">Browse and search laboratories, classrooms, seminar halls, and shared equipment.</p>
     </div>
-    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+    <div class="col-md-4 text-md-end">
         {% if can_manage %}
-            <a href="{% url 'resources:resource_create' %}" class="btn btn-success fw-semibold">
-                <i class="bi bi-plus-circle me-1"></i> Add New Resource
+            <a href="{% url 'resources:resource_create' %}" class="btn btn-gold btn-pill">
+                <i class="bi bi-plus-circle-fill me-1"></i> Add New Resource
             </a>
         {% endif %}
     </div>
 </div>
 
-<!-- Search & Filter Card -->
-<div class="card shadow-sm border-0 rounded-3 mb-4">
-    <div class="card-body p-3 p-md-4">
-        <form method="get" action="{% url 'resources:resource_list' %}" class="row g-3 align-items-end">
-            <!-- Search Keyword -->
-            <div class="col-md-4">
-                <label for="q" class="form-label small fw-semibold text-muted">Search Keyword</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
-                    <input type="text" name="q" id="q" value="{{ search_q }}" class="form-control" placeholder="Search by name, location, or equipment...">
-                </div>
+<!-- Search & Filter Glass Panel -->
+<div class="glass-panel p-4 mb-4">
+    <form method="get" action="{% url 'resources:resource_list' %}" class="row g-3 align-items-end">
+        <!-- Search Keyword -->
+        <div class="col-md-4">
+            <label for="q" class="form-label small fw-semibold text-muted">Search Keyword</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" name="q" id="q" value="{{ search_q }}" class="form-control" placeholder="Search by name, location, or facility...">
             </div>
+        </div>
 
-            <!-- Resource Type -->
-            <div class="col-sm-6 col-md-3">
-                <label for="type" class="form-label small fw-semibold text-muted">Resource Category</label>
-                <select name="type" id="type" class="form-select">
-                    <option value="">All Categories</option>
-                    {% for code, label in resource_types %}
-                        <option value="{{ code }}" {% if selected_type == code %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
-            </div>
+        <!-- Resource Type -->
+        <div class="col-sm-6 col-md-3">
+            <label for="type" class="form-label small fw-semibold text-muted">Category</label>
+            <select name="type" id="type" class="form-select">
+                <option value="">All Categories</option>
+                {% for code, label in resource_types %}
+                    <option value="{{ code }}" {% if selected_type == code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
 
-            <!-- Location -->
-            <div class="col-sm-6 col-md-2">
-                <label for="location" class="form-label small fw-semibold text-muted">Location / Block</label>
-                <input type="text" name="location" id="location" value="{{ selected_location }}" class="form-control" placeholder="e.g. Science Block">
-            </div>
+        <!-- Location -->
+        <div class="col-sm-6 col-md-2">
+            <label for="location" class="form-label small fw-semibold text-muted">Location / Block</label>
+            <input type="text" name="location" id="location" value="{{ selected_location }}" class="form-control" placeholder="e.g. Science Block">
+        </div>
 
-            <!-- Min Capacity -->
-            <div class="col-sm-6 col-md-1">
-                <label for="min_capacity" class="form-label small fw-semibold text-muted">Min Seats</label>
-                <input type="number" name="min_capacity" id="min_capacity" value="{{ min_capacity }}" min="1" class="form-control" placeholder="10">
-            </div>
+        <!-- Min Capacity -->
+        <div class="col-sm-6 col-md-1">
+            <label for="min_capacity" class="form-label small fw-semibold text-muted">Min Seats</label>
+            <input type="number" name="min_capacity" id="min_capacity" value="{{ min_capacity }}" min="1" class="form-control" placeholder="10">
+        </div>
 
-            {% if can_manage %}
-            <!-- Status Filter for Admins/Managers -->
-            <div class="col-sm-6 col-md-1">
-                <label for="status" class="form-label small fw-semibold text-muted">Status</label>
-                <select name="status" id="status" class="form-select">
-                    <option value="">All</option>
-                    <option value="active" {% if selected_status == 'active' %}selected{% endif %}>Active</option>
-                    <option value="inactive" {% if selected_status == 'inactive' %}selected{% endif %}>Inactive</option>
-                </select>
-            </div>
-            {% endif %}
+        {% if can_manage %}
+        <!-- Status Filter for Admins/Managers -->
+        <div class="col-sm-6 col-md-1">
+            <label for="status" class="form-label small fw-semibold text-muted">Status</label>
+            <select name="status" id="status" class="form-select">
+                <option value="">All</option>
+                <option value="active" {% if selected_status == 'active' %}selected{% endif %}>Active</option>
+                <option value="inactive" {% if selected_status == 'inactive' %}selected{% endif %}>Inactive</option>
+            </select>
+        </div>
+        {% endif %}
 
-            <!-- Submit and Reset Buttons -->
-            <div class="col-sm-12 col-md-1 d-flex gap-2">
-                <button type="submit" class="btn btn-primary w-100" title="Apply Filters">
-                    <i class="bi bi-funnel-fill"></i>
-                </button>
-                <a href="{% url 'resources:resource_list' %}" class="btn btn-outline-secondary" title="Reset Filters">
-                    <i class="bi bi-arrow-counterclockwise"></i>
-                </a>
-            </div>
-        </form>
-    </div>
+        <!-- Submit and Reset Buttons -->
+        <div class="col-sm-12 col-md-1 d-flex gap-2">
+            <button type="submit" class="btn btn-gold btn-pill w-100" title="Apply Filters">
+                <i class="bi bi-funnel-fill"></i>
+            </button>
+            <a href="{% url 'resources:resource_list' %}" class="btn btn-glass btn-pill-icon" title="Reset Filters">
+                <i class="bi bi-arrow-counterclockwise"></i>
+            </a>
+        </div>
+    </form>
 </div>
 
 <!-- Results Header -->
 <div class="d-flex justify-content-between align-items-center mb-3">
     <div class="small text-muted">
-        Showing <span class="fw-bold text-dark">{{ page_obj.start_index|default:0 }}</span> to <span class="fw-bold text-dark">{{ page_obj.end_index|default:0 }}</span> of <span class="fw-bold text-dark">{{ page_obj.paginator.count }}</span> resources
+        Showing <span class="fw-bold text-white">{{ page_obj.start_index|default:0 }}</span> to <span class="fw-bold text-white">{{ page_obj.end_index|default:0 }}</span> of <span class="fw-bold text-white">{{ page_obj.paginator.count }}</span> resources
     </div>
     {% if search_q or selected_type or selected_location or min_capacity or selected_status %}
-        <a href="{% url 'resources:resource_list' %}" class="badge bg-light text-dark border text-decoration-none">
+        <a href="{% url 'resources:resource_list' %}" class="badge badge-glass text-decoration-none">
             <i class="bi bi-x-circle me-1"></i>Clear all filters
         </a>
     {% endif %}
@@ -94,61 +95,63 @@
 <div class="row g-4 mb-4">
     {% for res in page_obj %}
         <div class="col-md-6 col-lg-4">
-            <div class="card h-100 shadow-sm border-0 rounded-3 hover-shadow transition">
-                <div class="card-header bg-white border-bottom-0 pt-3 pb-0 d-flex justify-content-between align-items-start">
-                    <span class="badge 
-                        {% if res.resource_type == 'LAB' %}bg-primary
-                        {% elif res.resource_type == 'SEMINAR_HALL' %}bg-info text-dark
-                        {% elif res.resource_type == 'CLASSROOM' %}bg-secondary
-                        {% elif res.resource_type == 'PROJECTOR' %}bg-warning text-dark
-                        {% elif res.resource_type == 'EQUIPMENT' %}bg-dark
-                        {% else %}bg-secondary{% endif %}">
-                        {{ res.get_resource_type_display }}
-                    </span>
-                    {% if res.is_active %}
-                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">
-                            <i class="bi bi-check-circle me-1"></i>Active
-                        </span>
-                    {% else %}
-                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25">
-                            <i class="bi bi-slash-circle me-1"></i>Inactive
-                        </span>
-                    {% endif %}
-                </div>
+            <div class="card glass-panel h-100 p-4 d-flex flex-column justify-content-between position-relative overflow-hidden">
+                <!-- Ambient Subtle Corner Glow -->
+                <div style="position: absolute; top: -20px; right: -20px; width: 120px; height: 120px; background: radial-gradient(circle, rgba(245, 158, 11, 0.15) 0%, transparent 70%); filter: blur(20px); pointer-events: none;"></div>
 
-                <div class="card-body">
-                    <h5 class="card-title fw-bold mb-2">
-                        <a href="{% url 'resources:resource_detail' res.pk %}" class="text-decoration-none text-dark">
+                <div>
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="badge 
+                            {% if res.resource_type == 'LAB' %}badge-cyan
+                            {% elif res.resource_type == 'SEMINAR_HALL' %}badge-gold
+                            {% elif res.resource_type == 'CLASSROOM' %}badge-glass
+                            {% elif res.resource_type == 'PROJECTOR' %}badge-emerald
+                            {% else %}badge-glass{% endif %}">
+                            {{ res.get_resource_type_display }}
+                        </span>
+                        {% if res.is_active %}
+                            <span class="badge badge-emerald">
+                                <i class="bi bi-check-circle me-1"></i>Active
+                            </span>
+                        {% else %}
+                            <span class="badge badge-rose">
+                                <i class="bi bi-slash-circle me-1"></i>Inactive
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <h5 class="fw-bold text-white mb-2">
+                        <a href="{% url 'resources:resource_detail' res.pk %}" class="text-white text-decoration-none">
                             {{ res.name }}
                         </a>
                     </h5>
-                    
+
                     <div class="text-muted small mb-2 d-flex align-items-center">
-                        <i class="bi bi-geo-alt-fill text-danger me-2"></i>
+                        <i class="bi bi-geo-alt text-warning me-2"></i>
                         <span>{{ res.location }}</span>
                     </div>
 
                     <div class="text-muted small mb-3 d-flex align-items-center">
-                        <i class="bi bi-people-fill text-primary me-2"></i>
-                        <span>Capacity: <strong>{{ res.capacity }}</strong> seats/units</span>
+                        <i class="bi bi-people text-info me-2"></i>
+                        <span>Capacity: <strong class="text-white">{{ res.capacity }}</strong> seats/units</span>
                     </div>
 
-                    <p class="card-text text-muted small text-truncate-2" style="min-height: 40px;">
-                        {{ res.description|default:"No additional description provided." }}
+                    <p class="text-muted small mb-4" style="min-height: 40px;">
+                        {{ res.description|default:"Standard campus facility with projector and audio equipment."|truncatechars:100 }}
                     </p>
                 </div>
 
-                <div class="card-footer bg-white border-top-0 pt-0 pb-3 d-flex gap-2">
-                    <a href="{% url 'resources:resource_detail' res.pk %}" class="btn btn-outline-primary btn-sm flex-grow-1">
-                        <i class="bi bi-calendar3 me-1"></i> Details & Schedule
+                <div class="d-flex gap-2 pt-3 border-top" style="border-color: rgba(255, 255, 255, 0.08) !important;">
+                    <a href="{% url 'resources:resource_detail' res.pk %}" class="btn btn-glass btn-pill btn-sm flex-grow-1">
+                        <i class="bi bi-calendar3 me-1"></i> Schedule
                     </a>
                     {% if res.is_active %}
-                        <a href="{% url 'bookings:create_booking_for_resource' res.pk %}" class="btn btn-primary btn-sm px-3">
-                            <i class="bi bi-bookmark-plus"></i> Book
+                        <a href="{% url 'bookings:create_booking_for_resource' res.pk %}" class="btn btn-gold btn-pill btn-sm px-3">
+                            <i class="bi bi-bookmark-plus me-1"></i> Book
                         </a>
                     {% else %}
-                        <button class="btn btn-secondary btn-sm px-3" disabled title="Resource is currently inactive">
-                            Book
+                        <button class="btn btn-glass btn-pill btn-sm px-3 text-muted" disabled>
+                            Inactive
                         </button>
                     {% endif %}
                 </div>
@@ -156,24 +159,22 @@
         </div>
     {% empty %}
         <div class="col-12 py-5 text-center">
-            <div class="card shadow-sm border-0 py-5">
+            <div class="glass-panel py-5">
                 <i class="bi bi-search fs-1 text-muted mb-2"></i>
-                <h4 class="fw-bold">No resources matched your criteria</h4>
-                <p class="text-muted mb-3">Try clearing search filters or adjusting keyword criteria.</p>
-                <div>
-                    <a href="{% url 'resources:resource_list' %}" class="btn btn-outline-primary">
-                        <i class="bi bi-arrow-counterclockwise me-1"></i> View All Resources
-                    </a>
-                </div>
+                <h4 class="fw-bold text-white">No resources matched your criteria</h4>
+                <p class="text-muted mb-3">Try adjusting your search keyword or clearing category filters.</p>
+                <a href="{% url 'resources:resource_list' %}" class="btn btn-gold btn-pill btn-sm">
+                    View All Resources
+                </a>
             </div>
         </div>
     {% endfor %}
 </div>
 
-<!-- Pagination -->
+<!-- Pagination Controls -->
 {% if page_obj.has_other_pages %}
 <nav aria-label="Resource listing pagination" class="d-flex justify-content-center">
-    <ul class="pagination shadow-sm">
+    <ul class="pagination">
         {% if page_obj.has_previous %}
             <li class="page-item">
                 <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_q %}&q={{ search_q }}{% endif %}{% if selected_type %}&type={{ selected_type }}{% endif %}{% if selected_location %}&location={{ selected_location }}{% endif %}{% if min_capacity %}&min_capacity={{ min_capacity }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}">
