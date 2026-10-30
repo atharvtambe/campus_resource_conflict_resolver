@@ -206,45 +206,7 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <!-- Theme Switcher Script with LocalStorage Persistence -->
-    <script>
-    (function() {
-        const themeToggleBtn = document.getElementById('themeToggleBtn');
-        const themeToggleIcon = document.getElementById('themeToggleIcon');
-        const rootHtml = document.documentElement;
-
-        function applyTheme(theme) {
-            if (theme === 'light') {
-                rootHtml.setAttribute('data-theme', 'light');
-                document.body.setAttribute('data-theme', 'light');
-                if (themeToggleIcon) {
-                    themeToggleIcon.className = 'bi bi-moon-stars-fill fs-5';
-                    themeToggleIcon.style.color = '#6366f1';
-                }
-            } else {
-                rootHtml.removeAttribute('data-theme');
-                document.body.removeAttribute('data-theme');
-                if (themeToggleIcon) {
-                    themeToggleIcon.className = 'bi bi-sun text-warning fs-5';
-                    themeToggleIcon.style.color = '#f59e0b';
-                }
-            }
-            localStorage.setItem('cr_theme', theme);
-        }
-
-        // Apply saved theme on initial load
-        const savedTheme = localStorage.getItem('cr_theme') || 'dark';
-        applyTheme(savedTheme);
-
-        if (themeToggleBtn) {
-            themeToggleBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                const isCurrentlyLight = rootHtml.getAttribute('data-theme') === 'light' || document.body.getAttribute('data-theme') === 'light';
-                const nextTheme = isCurrentlyLight ? 'dark' : 'light';
-                applyTheme(nextTheme);
-            });
-        }
-    })();
-    </script>
+    <script src="{% static 'js/theme_toggle.js' %}"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>
