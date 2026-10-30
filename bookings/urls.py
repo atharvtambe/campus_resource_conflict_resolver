@@ -15,4 +15,7 @@ urlpatterns = [
     path('manage/', views.manage_bookings, name='manage_bookings'),
     path('<int:pk>/approve/', views.approve_booking, name='approve_booking'),
     path('<int:pk>/reject/', views.reject_booking, name='reject_booking'),
+
+    # Real-time conflict validation API
+    path('api/check-conflict/', views.check_conflict_api, name='api_check_conflict'),
 ]

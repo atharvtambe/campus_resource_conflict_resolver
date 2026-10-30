@@ -279,3 +279,95 @@ def manage_bookings(request):
         'approved_count': approved_count,
         'total_count': total_count,
     })
+
+
+@login_required
+def check_conflict_api(request):
+    """
+    Asynchronous JSON endpoint for real-time frontend conflict checking.
+    Dynamically called via JavaScript DOM listeners on the booking form.
+    """
+    from django.http import JsonResponse
+    from django.utils.dateparse import parse_datetime
+
+    resource_id = request.GET.get('resource_id')
+    start_str = request.GET.get('start_time')
+    end_str = request.GET.get('end_time')
+
+    if not resource_id or not start_str or not end_str:
+        return JsonResponse({
+            'available': False,
+            'incomplete': True,
+            'message': 'Please select a resource and both start and end times.'
+        })
+
+    try:
+        resource = Resource.objects.get(pk=resource_id)
+    except Resource.DoesNotExist:
+        return JsonResponse({'available': False, 'message': 'Resource not found.'}, status=404)
+
+    if not resource.is_active:
+        return JsonResponse({
+            'available': False,
+            'message': f"Resource '{resource.name}' is currently inactive or offline."
+        })
+
+    start_time = parse_datetime(start_str)
+    end_time = parse_datetime(end_str)
+
+    if not start_time or not end_time:
+        return JsonResponse({'available': False, 'message': 'Invalid date/time format.'}, status=400)
+
+    # Ensure timezone aware
+    if timezone.is_naive(start_time):
+        start_time = timezone.make_aware(start_time, timezone.get_current_timezone())
+    if timezone.is_naive(end_time):
+        end_time = timezone.make_aware(end_time, timezone.get_current_timezone())
+
+    if start_time >= end_time:
+        return JsonResponse({
+            'available': False,
+            'message': 'Start time must be strictly before end time.'
+        })
+
+    if start_time < timezone.now():
+        return JsonResponse({
+            'available': False,
+            'message': 'Reservation cannot be scheduled in the past.'
+        })
+
+    # Check maintenance blocks
+    from .services import get_conflicting_maintenance_blocks, get_conflicting_bookings
+    maintenance = get_conflicting_maintenance_blocks(resource, start_time, end_time)
+    if maintenance.exists():
+        block = maintenance.first()
+        return JsonResponse({
+            'available': False,
+            'conflict_type': 'MAINTENANCE',
+            'message': f"Resource is blocked for maintenance: {block.reason} ({block.start_time.strftime('%H:%M')} - {block.end_time.strftime('%H:%M')})"
+        })
+
+    # Check existing bookings
+    conflicts = get_conflicting_bookings(resource, start_time, end_time)
+    if conflicts.exists():
+        first_conf = conflicts.first()
+        return JsonResponse({
+            'available': False,
+            'conflict_type': 'BOOKING',
+            'message': f"Slot collision with reservation #{first_conf.id} ({first_conf.start_time.strftime('%b %d, %H:%M')} - {first_conf.end_time.strftime('%H:%M')})."
+        })
+
+    # Calculate duration
+    duration = end_time - start_time
+    hours, remainder = divmod(int(duration.total_seconds()), 3600)
+    minutes = remainder // 60
+    duration_str = f"{hours}h {minutes}m" if hours else f"{minutes}m"
+
+    return JsonResponse({
+        'available': True,
+        'message': f"This slot is completely free! Duration: {duration_str}.",
+        'resource_name': resource.name,
+        'location': resource.location,
+        'capacity': resource.capacity,
+    })
+
